@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  localstack:
+    image: localstack/localstack:0.9.4
+    ports:
+      - "4568:4568"
+      - "8080:8080"
+    environment:
+      SERVICES: kinesis
+      DEBUG: 1
+      USE_SSL: 1
+
+  aws-cli:
+    image: amazon/aws-cli:2.1.28
+    depends_on:
+      - localstack
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: bash -c
+    command: >
+      "
+        echo ****************** Creating Stream ******************
+        sleep 10;
+        aws kinesis create-stream --endpoint-url=https://localstack:4568 --stream-name rizwan.test.stream --shard-count 1 --no-verify-ssl;
+        sleep 2;
+        aws kinesis put-record --stream-name rizwan.test.stream --partition-key myKey --data hello_from_rizwan1 --no-verify-ssl --endpoint-url https://localhost:4568
+        aws kinesis put-record --stream-name rizwan.test.stream --partition-key myKey --data hello_from_rizwan2 --no-verify-ssl --endpoint-url https://localhost:4568
+        aws kinesis put-record --stream-name rizwan.test.stream --partition-key myKey --data hello_from_rizwan2 --no-verify-ssl --endpoint-url https://localhost:4568
+        echo ****************** Successfully created Stream ******************
+      "

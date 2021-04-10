@@ -1,0 +1,7 @@
+.*
+!.gitignore
+logs
+target
+project/metals.sbt
+project/project
+/RUNNING_PID
